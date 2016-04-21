@@ -1,0 +1,12 @@
+# Stuff I don't want up here
+*.py
+*.bin
+*.txt
+*.xml
+*.tsv
+*.csv
+*.exe
+
+cia/
+tik/
+raw/
