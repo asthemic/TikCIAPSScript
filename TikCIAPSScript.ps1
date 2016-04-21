@@ -28,7 +28,7 @@ Get-Content -Path $path | Foreach-Object {
 
 	if(($Region -eq $UserRegion) -or ($Region -eq 'ALL'))
 	{
-		if ($titelid.Length -gt 15 -and ($EncryptedTitleKey.Length -gt 31) -and ($Type -eq $Usertype))
+		if ($titelid.Length -gt 15 -and ($EncryptedTitleKey.Length -gt 31) -and ($Type -eq $Usertype) -and !($Name -match 'Video$' -or $Name -match 'Demo$'))
 		{
 			# remove unicode
 			$Name = Remove-InvalidFileNameChars(-Join $encoding.GetChars([System.Text.Encoding]::Convert($uencoding, $encoding, $uencoding.GetBytes($Name)))).Replace("?","");
@@ -60,5 +60,3 @@ Get-Content -Path $path | Foreach-Object {
 	}
 }
 Write-Host "Done"
-#Write-Host "Press any key to continue..."
-#$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
