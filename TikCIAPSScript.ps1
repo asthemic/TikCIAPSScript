@@ -2,7 +2,9 @@ param (
     [string]$path = "EncTitleKeys.tsv",
     [string]$Generate = "TIK",
     [string]$Usertype = "eShop/Application",
-    [string]$UserRegion = "EUR"
+    [string]$UserRegion = "EUR",
+    [bool]$renamefile = $true,
+    [bool]$justmove = $false
  )
 
 $encoding = [System.Text.Encoding]::ASCII;
@@ -38,20 +40,30 @@ Get-Content -Path $path | Foreach-Object {
 			if ($Generate -eq 'CIA')
 			{
 			   .\FunKeyCIA.py -title $titelid -key $EncryptedTitleKey
-				$FolderLocation = $FolderLocation + '\cia';
+				$FolderLocation = $FolderLocation + '\' + $Generate.ToLower();
 			}
 			else
 			{
 				.\TikGenerator.py -title $titelid -key $EncryptedTitleKey | write-output
-				$FolderLocation = $FolderLocation + '\tik';
+				$FolderLocation = $FolderLocation + '\' + $Generate.ToLower();
 			}
 			$CIALocation = $FolderLocation + '\' + $titelid;
 			$Dest = $FolderLocation + '\' + $Name;
-			Rename-item -Path $CIALocation -NewName $Dest -Force;
+            If ($renamefile)
+            {         
+    			$CIAMoveFileLocation = $CIALocation  + '\' + $titelid + '.' + $Generate.ToLower();
+    			$Dest = $Dest + '.' + $Generate.ToLower();
+    			Move-item -Path $CIAMoveFileLocation -Destination $Dest -Force;
+                Del -Path $CIALocation;
+            }
+            Elseif($justmove)
+            {            
+			    Rename-item -Path $CIALocation -NewName $Dest -Force;
+            }
 		}
         elseif ($titelid.Length -gt 15 -and ($EncryptedTitleKey.Length -lt 31) -and ($Type -eq $Usertype))
 		{
-            write-output "Missing encryptedkey $Name $Type"            
+            write-output "Missing encryptedkey $Name $Type"        
         }
         else
         {

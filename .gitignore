@@ -6,6 +6,9 @@
 *.tsv
 *.csv
 *.exe
+*.key
+*.jar
+*.properties
 
 cia/
 tik/
