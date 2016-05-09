@@ -1,7 +1,7 @@
 param (
     [string]$path = "EncTitleKeys.tsv",
     [string]$Generate = "TIK",
-    [string]$Usertype = "eShop/Application",
+    [string]$Usertype = "eShop/Application|DLC|DSiWare",
     [string]$UserRegion = "EUR",
     [bool]$renamefile = $true,
     [bool]$justmove = $false
@@ -30,7 +30,8 @@ Get-Content -Path $path | Foreach-Object {
 
 	if(($Region -eq $UserRegion) -or ($Region -eq 'ALL'))
 	{
-		if ($titelid.Length -gt 15 -and ($EncryptedTitleKey.Length -gt 31) -and ($Type -eq $Usertype) -and !($Name -match 'Video$' -or $Name -match 'Demo$'))
+        $excludes = '(Video)$|(Demo)$|(Demo Version)$|(3D Trailer)$|(Trailer)$';
+		if ($titelid.Length -gt 15 -and ($EncryptedTitleKey.Length -gt 31) -and ($Type -match $Usertype) -and !($Name -imatch $excludes))
 		{
 			# remove unicode
 			$Name = Remove-InvalidFileNameChars(-Join $encoding.GetChars([System.Text.Encoding]::Convert($uencoding, $encoding, $uencoding.GetBytes($Name)))).Replace("?","");
@@ -49,11 +50,28 @@ Get-Content -Path $path | Foreach-Object {
 			}
 			$CIALocation = $FolderLocation + '\' + $titelid;
 			$Dest = $FolderLocation + '\' + $Name;
+            
+            $FolderType = Remove-InvalidFileNameChars(-Join $encoding.GetChars([System.Text.Encoding]::Convert($uencoding, $encoding, $uencoding.GetBytes($Type)))).Replace("?","").Replace("/","");
+            $to = $FolderLocation + '\' + $FolderType;
+            if(!(Test-Path $to))
+            {
+                New-Item -Path $to -ItemType Directory -Force | Out-Null
+            }
+            $Dest = $to + '\' + $Name;
             If ($renamefile)
             {         
-    			$CIAMoveFileLocation = $CIALocation  + '\' + $titelid + '.' + $Generate.ToLower();
+    			$CIAMoveFileLocation = $CIALocation + '\' + $titelid + '.' + $Generate.ToLower();
     			$Dest = $Dest + '.' + $Generate.ToLower();
-    			Move-item -Path $CIAMoveFileLocation -Destination $Dest -Force;
+                
+                $incnum = 1;
+                $origDest = $Dest;
+                while(Test-Path -Path $Dest)
+                {
+                    $Dest = Join-Path (Get-Item $origDest).DirectoryName  ((Get-Item $origDest).Basename + " ($incnum)" + (Get-Item $origDest).Extension);
+               
+                   $incnum += 1;
+                }
+    			Move-item -Path $CIAMoveFileLocation -Destination $Dest -Force -Verbose;
                 Del -Path $CIALocation;
             }
             Elseif($justmove)
