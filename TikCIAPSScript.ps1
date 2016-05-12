@@ -25,7 +25,7 @@ Function Remove-InvalidFileNameChars {
 }
  
 Get-Content -Path $path | Foreach-Object {
-	Remove-Variable titelid;Remove-Variable DecryptedTitleKey;Remove-Variable EncryptedTitleKey;Remove-Variable Type;Remove-Variable Name;Remove-Variable Region;Remove-Variable Serial;
+	{Remove-Variable titelid;Remove-Variable DecryptedTitleKey;Remove-Variable EncryptedTitleKey;Remove-Variable Type;Remove-Variable Name;Remove-Variable Region;Remove-Variable Serial;} | out-null
     $titelid,$DecryptedTitleKey,$EncryptedTitleKey,$Type,$Name,$Region,$Serial = [regex]::split($_, '\t') |  foreach {$_.Trim()};
 
 	if(($Region -eq $UserRegion) -or ($Region -eq 'ALL'))
